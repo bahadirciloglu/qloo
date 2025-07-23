@@ -1,0 +1,21 @@
+# Core dependencies
+requests>=2.31.0
+dataclasses>=0.6; python_version < "3.7"
+typing-extensions>=4.0.0; python_version < "3.8"
+
+# Optional LLM framework dependencies
+# Uncomment the ones you want to use:
+
+# OpenAI integration
+openai>=1.0.0
+
+# Google Gemini integration
+google-generativeai>=0.3.0
+
+# Local LLM integration (transformers)
+# transformers>=4.30.0
+# torch>=2.0.0
+
+# Alternative local LLM options
+# sentence-transformers>=2.2.0
+# accelerate>=0.20.0 

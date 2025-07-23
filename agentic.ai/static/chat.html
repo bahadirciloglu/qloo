@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎹 Lento AI Concierge - Grand Hotel Istanbul</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Müzik notaları animasyonu */
+        body::before {
+            content: '♪♫♬♩';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite linear;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(-100vh) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        .chat-container {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 25px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.2),
+                0 0 0 1px rgba(255,255,255,0.1);
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Piyano tuşları efekti */
+        .chat-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                #000 0px,
+                #000 8px,
+                #fff 8px,
+                #fff 12px
+            );
+            border-radius: 25px 25px 0 0;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid #e74c3c;
+        }
+
+        .chat-header::after {
+            content: '🎹';
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 24px;
+            animation: piano-keys 2s infinite ease-in-out;
+        }
+
+        @keyframes piano-keys {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .chat-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            width: 15px;
+            height: 15px;
+            background: #27ae60;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .quick-access-grid {
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 2px solid #dee2e6;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .quick-access-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .quick-access-title::after {
+            content: '♪';
+            position: absolute;
+            right: 20%;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #e74c3c;
+            animation: music-note 3s infinite ease-in-out;
+        }
+
+        @keyframes music-note {
+            0%, 100% { transform: translateY(-50%) rotate(0deg); }
+            50% { transform: translateY(-50%) rotate(15deg); }
+        }
+
+        .quick-access-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .recommendation-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recommendation-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .recommendation-card:hover::before {
+            left: 100%;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #e74c3c;
+        }
+
+        .recommendation-card.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .recommendation-card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .card-content h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .card-content p {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+        }
+
+        .btn-details {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-details:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        .chat-toggle {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            border-bottom: 2px solid #95a5a6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chat-toggle::before {
+            content: '🎵';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            animation: music-bounce 2s infinite;
+        }
+
+        @keyframes music-bounce {
+            0%, 100% { transform: translateY(-50%); }
+            50% { transform: translateY(-60%); }
+        }
+
+        .chat-toggle:hover {
+            background: linear-gradient(135deg, #d5dbdb 0%, #aeb6bf 100%);
+            transform: translateY(-1px);
+        }
+
+        .chat-toggle span {
+            color: #2c3e50;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .chat-section {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        .chat-section.active {
+            display: flex;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+        }
+
+        .chat-box::before {
+            content: '♪♫♬♩';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 16px;
+            color: rgba(231, 76, 60, 0.2);
+            animation: float-notes 10s infinite linear;
+        }
+
+        @keyframes float-notes {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
+            50% { transform: translateY(-10px) rotate(180deg); opacity: 0.4; }
+            100% { transform: translateY(0) rotate(360deg); opacity: 0.2; }
+        }
+
+        .message {
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            animation: messageSlide 0.5s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .bot-message .message-avatar {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 18px;
+            border-radius: 20px;
+            position: relative;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border-bottom-right-radius: 8px;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .bot-message .message-content {
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #ecf0f1;
+            border-bottom-left-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .input-area {
+            padding: 25px;
+            background: white;
+            border-top: 2px solid #ecf0f1;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            position: relative;
+        }
+
+        .input-area::before {
+            content: '🎹';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #e74c3c;
+            opacity: 0.7;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 18px 20px 18px 45px;
+            border: 2px solid #ecf0f1;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .input-area input:focus {
+            border-color: #e74c3c;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .input-area button {
+            padding: 18px 30px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 18px;
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 15px;
+            margin: 10px 0;
+        }
+
+        .recommendations-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border: 3px solid #e74c3c;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .modal-header h3 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #e74c3c;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.2);
+        }
+
+        .recommendation-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border-left: 5px solid #e74c3c;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .recommendation-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .recommendation-item p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                max-width: 100%;
+            }
+            
+            .quick-access-cards {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 15px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .modal-content {
+                margin: 20px;
+                max-width: calc(100% - 40px);
+                padding: 25px;
+            }
+
+            .chat-header h1 {
+                font-size: 24px;
+            }
+
+            .quick-access-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="status-indicator"></div>
+            <h1>🎹 Lento AI Concierge</h1>
+            <p>Grand Hotel Istanbul - Your elegant musical assistant</p>
+        </div>
+
+        <!-- Quick Access Menu -->
+        <div class="quick-access-grid" id="quickAccessGrid">
+            <div class="quick-access-title">🎵 Quick Access Recommendations</div>
+            <div class="quick-access-cards">
+                <!-- Food & Beverage -->
+                <div class="recommendation-card" data-category="food-beverage">
+                    <div class="card-icon">🍽️</div>
+                    <div class="card-content">
+                        <h3>Food & Beverage</h3>
+                        <p>Restaurants, cafes, local cuisine recommendations</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+
+                <!-- Wellness Support -->
+                <div class="recommendation-card" data-category="wellness">
+                    <div class="card-icon">🧘</div>
+                    <div class="card-content">
+                        <h3>Wellness Support</h3>
+                        <p>Spa, massage, relaxation areas, shower</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+
+                <!-- Nearby Places -->
+                <div class="recommendation-card" data-category="nearby">
+                    <div class="card-icon">📍</div>
+                    <div class="card-content">
+                        <h3>Nearby Places</h3>
+                        <p>Market, pharmacy, transportation, parking</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+
+                <!-- Tourist Attractions -->
+                <div class="recommendation-card" data-category="attractions">
+                    <div class="card-icon">🏛️</div>
+                    <div class="card-content">
+                        <h3>Tourist Attractions</h3>
+                        <p>Museums, historical sites, natural beauty</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+
+                <!-- Transportation -->
+                <div class="recommendation-card" data-category="transportation">
+                    <div class="card-icon">🚇</div>
+                    <div class="card-content">
+                        <h3>Transportation</h3>
+                        <p>Metro, bus, tram, taxi calling</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+
+                <!-- Tonight's Recommendations -->
+                <div class="recommendation-card" data-category="tonight">
+                    <div class="card-icon">🌙</div>
+                    <div class="card-content">
+                        <h3>Tonight</h3>
+                        <p>Night venues, live music, entertainment</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+
+                <!-- Events -->
+                <div class="recommendation-card" data-category="events">
+                    <div class="card-icon">🎭</div>
+                    <div class="card-content">
+                        <h3>Events</h3>
+                        <p>Concerts, theater, festivals</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+
+                <!-- Hotel Services -->
+                <div class="recommendation-card" data-category="hotel-services">
+                    <div class="card-icon">🏨</div>
+                    <div class="card-content">
+                        <h3>Hotel Services</h3>
+                        <p>WiFi, room service, housekeeping, valet</p>
+                        <button class="btn-details">Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Toggle -->
+        <div class="chat-toggle" onclick="toggleChat()">
+            <span>💬 Start a private chat with Lento...</span>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="chat-section" id="chatSection">
+            <div class="chat-box" id="chatBox">
+                <div class="message bot-message">
+                    <div class="message-avatar">🎹</div>
+                    <div class="message-content">
+                        Hello! I'm Lento, Grand Hotel Istanbul's music-loving AI Concierge. 🎵<br><br>
+                        How can I help you? You can ask me about food recommendations, wellness support, nearby places, or any other questions. I'm here to provide you with a musical experience! ✨
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Write your message to Lento..." maxlength="500">
+                <button id="sendButton" onclick="sendMessage()">
+                    <span>Send</span>
+                    <span>🎵</span>
+                </button>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                Lento is typing... 🎹
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Modal -->
+    <div class="recommendations-modal" id="recommendationsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Lento's Recommendations</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isProcessing = false;
+        let chatVisible = false;
+
+        // Card click events
+        document.querySelectorAll('.recommendation-card').forEach(card => {
+            card.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('btn-details')) {
+                    const category = card.dataset.category;
+                    
+                    // Show loading
+                    card.classList.add('loading');
+                    
+                    try {
+                        // Get data from API
+                        const response = await fetch(`/quick-recommendations/${category}`);
+                        const data = await response.json();
+                        
+                        // Show in modal
+                        showRecommendationsModal(data);
+                        
+                    } catch (error) {
+                        console.error('Could not get recommendations:', error);
+                        // Fallback: redirect to chat
+                        sendQuickMessage(`${getCategoryMessage(category)}`);
+                    } finally {
+                        card.classList.remove('loading');
+                    }
+                }
+            });
+        });
+
+        function getCategoryMessage(category) {
+            const messages = {
+                'food-beverage': 'Can I get food and beverage recommendations?',
+                'wellness': 'Can I get wellness support recommendations?',
+                'nearby': 'Can I get information about nearby places?',
+                'attractions': 'Can I get information about tourist attractions?',
+                'transportation': 'Can I get information about transportation and taxi calling?',
+                'tonight': 'Can I get recommendations for tonight?',
+                'events': 'Can I get information about upcoming events this week?',
+                'hotel-services': 'Can I get information about hotel services?'
+            };
+            return messages[category] || 'Can I get information about this category?';
+        }
+
+        function showRecommendationsModal(data) {
+            const modal = document.getElementById('recommendationsModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+            
+            title.textContent = `🎹 Lento's ${getCategoryTitle(data.category)} Recommendations`;
+            
+            let html = '';
+            if (data.restaurants && data.restaurants.length > 0) {
+                html += '<h4>🍽️ Restaurants</h4>';
+                data.restaurants.forEach(item => {
+                    html += `<div class="recommendation-item">
+                        <h4>${item.name}</h4>
+                        <p>${item.description || 'No description available'}</p>
+                    </div>`;
+                });
+            }
+            
+            if (data.activities && data.activities.length > 0) {
+                html += '<h4>🎯 Activities</h4>';
+                data.activities.forEach(item => {
+                    html += `<div class="recommendation-item">
+                        <h4>${item.name}</h4>
+                        <p>${item.description || 'No description available'}</p>
+                    </div>`;
+                });
+            }
+            
+            if (data.services && data.services.length > 0) {
+                html += '<h4>🛎️ Services</h4>';
+                data.services.forEach(item => {
+                    html += `<div class="recommendation-item">
+                        <h4>${item.name}</h4>
+                        <p>${item.description || 'No description available'}</p>
+                    </div>`;
+                });
+            }
+            
+            if (data.places && data.places.length > 0) {
+                html += '<h4>📍 Places</h4>';
+                data.places.forEach(item => {
+                    html += `<div class="recommendation-item">
+                        <h4>${item.name}</h4>
+                        <p>${item.description || 'No description available'}</p>
+                    </div>`;
+                });
+            }
+            
+            if (data.transportation && data.transportation.length > 0) {
+                html += '<h4>🚇 Transportation</h4>';
+                data.transportation.forEach(item => {
+                    html += `<div class="recommendation-item">
+                        <h4>${item.name}</h4>
+                        <p>${item.description || 'No description available'}</p>
+                    </div>`;
+                });
+            }
+            
+            if (html === '') {
+                html = '<p>No recommendations available for this category yet. You can chat with Lento to get more detailed information. 🎵</p>';
+            }
+            
+            content.innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        function getCategoryTitle(category) {
+            const titles = {
+                'food-beverage': 'Food & Beverage',
+                'wellness': 'Wellness Support',
+                'nearby': 'Nearby Places',
+                'attractions': 'Tourist Attractions',
+                'transportation': 'Transportation',
+                'tonight': 'Tonight',
+                'events': 'Events',
+                'hotel-services': 'Hotel Services'
+            };
+            return titles[category] || 'General';
+        }
+
+        function closeModal() {
+            document.getElementById('recommendationsModal').style.display = 'none';
+        }
+
+        function toggleChat() {
+            const chatSection = document.getElementById('chatSection');
+            const quickAccessGrid = document.getElementById('quickAccessGrid');
+            const chatToggle = document.querySelector('.chat-toggle');
+            
+            chatVisible = !chatVisible;
+            
+            if (chatVisible) {
+                chatSection.classList.add('active');
+                quickAccessGrid.style.display = 'none';
+                chatToggle.innerHTML = '<span>🔙 Back to Quick Menu</span>';
+            } else {
+                chatSection.classList.remove('active');
+                quickAccessGrid.style.display = 'block';
+                chatToggle.innerHTML = '<span>💬 Start a private chat with Lento...</span>';
+            }
+        }
+
+        function addMessage(message, sender) {
+            const chatBox = document.getElementById('chatBox');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'user' ? '👤' : '🎹';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = message;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            chatBox.appendChild(messageDiv);
+            
+            // Auto scroll
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'block';
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'none';
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const message = input.value.trim();
+            
+            if (!message || isProcessing) return;
+
+            // Update UI
+            isProcessing = true;
+            sendButton.disabled = true;
+            input.disabled = true;
+            
+            // Show user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        guest_id: 'guest_' + Date.now(),
+                        message: message
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                hideTypingIndicator();
+                addMessage(data.message, 'bot');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                hideTypingIndicator();
+                addMessage('Sorry, an error occurred. Please try again later. 🎵', 'bot');
+            } finally {
+                // Restore UI
+                isProcessing = false;
+                sendButton.disabled = false;
+                input.disabled = false;
+                input.focus();
+            }
+        }
+
+        function sendQuickMessage(message) {
+            // Open chat
+            if (!chatVisible) {
+                toggleChat();
+            }
+            
+            const input = document.getElementById('messageInput');
+            input.value = message;
+            sendMessage();
+        }
+
+        // Send with Enter key
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('recommendationsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Focus input when page loads
+        window.addEventListener('load', function() {
+            document.getElementById('messageInput').focus();
+        });
+    </script>
+</body>
+</html> 
