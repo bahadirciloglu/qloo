@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class RequestMetrics:
-    """Tek bir istek için metrikler"""
+    """Metrics for a single request"""
     request_id: str
     start_time: float
     end_time: Optional[float] = None
@@ -26,7 +26,7 @@ class RequestMetrics:
     qloo_api_success: int = 0
 
 class MetricsCollector:
-    """Metrik toplama ve analiz sistemi"""
+    """Metrics collection and analysis system"""
     
     def __init__(self):
         self.requests: List[RequestMetrics] = []
@@ -34,7 +34,7 @@ class MetricsCollector:
         self._lock = asyncio.Lock()
     
     async def start_request(self, request_id: str) -> RequestMetrics:
-        """Yeni istek başlat"""
+        """Start new request"""
         metrics = RequestMetrics(
             request_id=request_id,
             start_time=time.time()
@@ -44,7 +44,7 @@ class MetricsCollector:
         return metrics
     
     async def end_request(self, request_id: str, success: bool = True, error_message: str = None):
-        """İsteği sonlandır"""
+        """End request"""
         async with self._lock:
             for req in self.requests:
                 if req.request_id == request_id:
@@ -54,7 +54,7 @@ class MetricsCollector:
                     break
     
     async def record_qloo_api_call(self, request_id: str, duration: float, success: bool):
-        """Qloo API çağrısını kaydet"""
+        """Record Qloo API call"""
         async with self._lock:
             for req in self.requests:
                 if req.request_id == request_id:
@@ -67,7 +67,7 @@ class MetricsCollector:
                     break
     
     async def record_llm_processing(self, request_id: str, duration: float):
-        """LLM işleme süresini kaydet"""
+        """Record LLM processing time"""
         async with self._lock:
             for req in self.requests:
                 if req.request_id == request_id:
@@ -75,7 +75,7 @@ class MetricsCollector:
                     break
     
     async def record_intent_detection(self, request_id: str, duration: float, intent: str):
-        """Niyet algılama süresini kaydet"""
+        """Record intent detection time"""
         async with self._lock:
             for req in self.requests:
                 if req.request_id == request_id:
@@ -84,7 +84,7 @@ class MetricsCollector:
                     break
     
     async def record_response_generation(self, request_id: str, duration: float):
-        """Yanıt oluşturma süresini kaydet"""
+        """Record response generation time"""
         async with self._lock:
             for req in self.requests:
                 if req.request_id == request_id:
@@ -92,7 +92,7 @@ class MetricsCollector:
                     break
     
     async def record_language_detection(self, request_id: str, language: str):
-        """Dil algılama sonucunu kaydet"""
+        """Record language detection result"""
         async with self._lock:
             for req in self.requests:
                 if req.request_id == request_id:
@@ -100,7 +100,7 @@ class MetricsCollector:
                     break
     
     def get_system_metrics(self) -> Dict:
-        """Sistem metriklerini al"""
+        """Get system metrics"""
         try:
             memory = psutil.virtual_memory()
             cpu = psutil.cpu_percent(interval=1)
@@ -113,11 +113,11 @@ class MetricsCollector:
                 "active_connections": len([r for r in self.requests if r.end_time is None])
             }
         except Exception as e:
-            logger.error(f"Sistem metrikleri alınamadı: {e}")
+            logger.error(f"Could not get system metrics: {e}")
             return {}
     
     def get_performance_metrics(self) -> Dict:
-        """Performans metriklerini al"""
+        """Get performance metrics"""
         if not self.requests:
             return {}
         
@@ -125,24 +125,24 @@ class MetricsCollector:
         if not completed_requests:
             return {}
         
-        # Genel metrikler
+        # General metrics
         total_requests = len(completed_requests)
         successful_requests = len([r for r in completed_requests if r.success])
         error_requests = total_requests - successful_requests
         
-        # Süre metrikleri
+        # Time metrics
         response_times = [r.end_time - r.start_time for r in completed_requests]
         avg_response_time = sum(response_times) / len(response_times)
         
-        # Qloo API metrikleri
+        # Qloo API metrics
         qloo_times = [r.qloo_api_time for r in completed_requests if r.qloo_api_time is not None]
         avg_qloo_time = sum(qloo_times) / len(qloo_times) if qloo_times else 0
         
-        # LLM metrikleri
+        # LLM metrics
         llm_times = [r.llm_processing_time for r in completed_requests if r.llm_processing_time is not None]
         avg_llm_time = sum(llm_times) / len(llm_times) if llm_times else 0
         
-        # Niyet algılama metrikleri
+        # Intent detection metrics
         intent_times = [r.intent_detection_time for r in completed_requests if r.intent_detection_time is not None]
         avg_intent_time = sum(intent_times) / len(intent_times) if intent_times else 0
         
@@ -160,7 +160,7 @@ class MetricsCollector:
         }
     
     def get_language_metrics(self) -> Dict:
-        """Dil kullanım metriklerini al"""
+        """Get language usage metrics"""
         if not self.requests:
             return {}
         
@@ -172,7 +172,7 @@ class MetricsCollector:
         return language_counts
     
     def get_intent_metrics(self) -> Dict:
-        """Niyet algılama metriklerini al"""
+        """Get intent detection metrics"""
         if not self.requests:
             return {}
         
@@ -184,7 +184,7 @@ class MetricsCollector:
         return intent_counts
     
     def get_recent_metrics(self, limit: int = 10) -> List[Dict]:
-        """Son isteklerin metriklerini al"""
+        """Get metrics for recent requests"""
         recent_requests = sorted(self.requests, key=lambda x: x.start_time, reverse=True)[:limit]
         
         metrics = []

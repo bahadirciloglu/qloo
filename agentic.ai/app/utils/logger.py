@@ -3,16 +3,16 @@ import os
 from datetime import datetime
 
 def setup_logger(name: str = "ai_concierge", level: str = "INFO"):
-    """Logger kurulumu"""
+    """Logger setup"""
     
-    # Logs dizinini oluştur
+    # Create logs directory
     os.makedirs("logs", exist_ok=True)
     
-    # Logger oluştur
+    # Create logger
     logger = logging.getLogger(name)
     logger.setLevel(getattr(logging, level.upper()))
     
-    # Eğer handler zaten varsa ekleme
+    # Don't add if handler already exists
     if logger.handlers:
         return logger
     
@@ -33,7 +33,7 @@ def setup_logger(name: str = "ai_concierge", level: str = "INFO"):
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
     
-    # Handler'ları ekle
+    # Add handlers
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
     

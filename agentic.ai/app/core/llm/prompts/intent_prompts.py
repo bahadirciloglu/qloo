@@ -1,9 +1,9 @@
 INTENT_ANALYSIS_PROMPT = """
-Sen bir AI Concierge agent'ısın. Kullanıcı mesajını analiz et ve şu bilgileri çıkar:
+You are an AI Concierge agent. Analyze the user message and extract the following information:
 
-Kullanıcı Mesajı: {user_message}
+User Message: {user_message}
 
-JSON formatında şu bilgileri döndür:
+Return the following information in JSON format:
 {{
     "intent": "restaurant_recommendation|activity_recommendation|hotel_info|booking|weather",
     "entities": {{
@@ -26,5 +26,5 @@ JSON formatında şu bilgileri döndür:
     "confidence": 0.95
 }}
 
-Sadece JSON döndür, başka açıklama yapma.
+Return only JSON, no other explanation.
 """ 

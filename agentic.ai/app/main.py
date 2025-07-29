@@ -1,8 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import httpx
+import asyncio
+from typing import Dict, Any
 
 from app.schemas.chat import ChatRequest, ChatResponse, HotelInfoResponse, RecommendationResponse
 from app.core.concierge import AIConcierge
@@ -10,36 +13,43 @@ from app.core.metrics import metrics_collector
 from app.config import settings
 from app.utils.logger import logger
 
-# FastAPI uygulamasını oluştur
+# Create FastAPI application
 app = FastAPI(
     title="AI Concierge",
-    description="Otel konukları için AI destekli Concierge sistemi",
+    description="AI-powered Concierge system for hotel guests",
     version="1.0.0"
 )
 
-# CORS middleware ekle
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:8080", 
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:5173"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Static dosyaları serve et
+# Serve static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# AI Concierge instance'ını oluştur
+# Create AI Concierge instance
 try:
     concierge = AIConcierge(settings)
-    logger.info("AI Concierge başarıyla başlatıldı")
+    logger.info("AI Concierge successfully started")
 except Exception as e:
-    logger.error(f"AI Concierge başlatılamadı: {e}")
+    logger.error(f"Failed to start AI Concierge: {e}")
     concierge = None
 
 @app.get("/", response_class=HTMLResponse)
 async def chat_interface():
-    """Chat arayüzü"""
+    """Chat interface"""
     try:
         with open("static/chat.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -49,7 +59,7 @@ async def chat_interface():
         <head><title>AI Concierge</title></head>
         <body>
             <h1>🏨 AI Concierge</h1>
-            <p>Chat arayüzü yüklenemedi. Lütfen static/chat.html dosyasını kontrol edin.</p>
+            <p>Chat interface could not be loaded. Please check the static/chat.html file.</p>
         </body>
         </html>
         """)
@@ -58,22 +68,22 @@ async def chat_interface():
 async def chat_endpoint(request: ChatRequest):
     """Chat API endpoint"""
     if not concierge:
-        raise HTTPException(status_code=500, detail="AI Concierge başlatılamadı")
+        raise HTTPException(status_code=500, detail="AI Concierge could not be started")
     
-    # Metrik toplama başlat
+    # Start metric collection
     import uuid
     request_id = str(uuid.uuid4())
     metrics = await metrics_collector.start_request(request_id)
     
     try:
-        logger.info(f"Chat isteği alındı: {request.guest_id} - {request.message[:50]}...")
+        logger.info(f"Chat request received: {request.guest_id} - {request.message[:50]}...")
         
         response = await concierge.process_guest_request(
             guest_id=request.guest_id,
             message=request.message
         )
         
-        # Başarılı istek sonlandır
+        # End successful request
         await metrics_collector.end_request(request_id, success=True)
         
         return ChatResponse(
@@ -81,14 +91,14 @@ async def chat_endpoint(request: ChatRequest):
             guest_id=request.guest_id
         )
     except Exception as e:
-        logger.error(f"Chat endpoint hatası: {e}")
-        # Hatalı istek sonlandır
+        logger.error(f"Chat endpoint error: {e}")
+        # End failed request
         await metrics_collector.end_request(request_id, success=False, error_message=str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/metrics")
 async def get_metrics():
-    """Sistem metriklerini getir"""
+    """Get system metrics"""
     try:
         return {
             "system": metrics_collector.get_system_metrics(),
@@ -98,26 +108,30 @@ async def get_metrics():
             "recent_requests": metrics_collector.get_recent_metrics(5)
         }
     except Exception as e:
-        logger.error(f"Metrikler alınırken hata: {e}")
+        logger.error(f"Error getting metrics: {e}")
         return {"error": str(e)}
 
 @app.get("/metrics/performance")
 async def get_performance_metrics():
-    """Performans metriklerini getir"""
+    """Get performance metrics"""
     try:
         return metrics_collector.get_performance_metrics()
     except Exception as e:
-        logger.error(f"Performans metrikleri alınırken hata: {e}")
+        logger.error(f"Error getting performance metrics: {e}")
         return {"error": str(e)}
 
 @app.get("/metrics/system")
 async def get_system_metrics():
-    """Sistem metriklerini getir"""
+    """Get system metrics"""
     try:
         return metrics_collector.get_system_metrics()
     except Exception as e:
-        logger.error(f"Sistem metrikleri alınırken hata: {e}")
+        logger.error(f"Error getting system metrics: {e}")
         return {"error": str(e)}
+
+
+
+
 
 if __name__ == "__main__":
     import uvicorn

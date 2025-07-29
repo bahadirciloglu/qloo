@@ -4,20 +4,20 @@ import asyncio
 import re
 from typing import Dict, List, Optional
 
-# Qloo API entegrasyonu için path ekle
+# Add path for Qloo API integration
 qloo_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'llm.qlooapi')
 sys.path.append(qloo_path)
 
 try:
     from qloo_llm_integration import QlooLLMIntegration, QlooConfig
-    print(f"✅ Qloo API entegrasyonu başarıyla yüklendi: {qloo_path}")
+    print(f"✅ Qloo API integration loaded successfully: {qloo_path}")
 except ImportError as e:
-    print(f"❌ Qloo API entegrasyonu bulunamadı: {e}")
-    print(f"🔍 Aranan path: {qloo_path}")
-    raise ImportError("Qloo API entegrasyonu gerekli")
+    print(f"❌ Qloo API integration not found: {e}")
+    print(f"🔍 Searched path: {qloo_path}")
+    raise ImportError("Qloo API integration required")
 
 class QlooIntegration:
-    """Qloo API entegrasyonu için wrapper sınıfı"""
+    """Wrapper class for Qloo API integration"""
     
     def __init__(self, config):
         self.config = config
@@ -28,16 +28,16 @@ class QlooIntegration:
                 base_url=config.qloo_base_url
             )
             self.qloo = QlooLLMIntegration(qloo_config)
-            print(f"✅ Qloo API bağlantısı kuruldu: {config.qloo_base_url}")
+            print(f"✅ Qloo API connection established: {config.qloo_base_url}")
         except Exception as e:
-            print(f"❌ Qloo API bağlantısı kurulamadı: {e}")
-            raise Exception(f"Qloo API bağlantısı kurulamadı: {e}")
+            print(f"❌ Qloo API connection failed: {e}")
+            raise Exception(f"Qloo API connection failed: {e}")
     
     def _analyze_user_query(self, message: str) -> Dict[str, List[str]]:
-        """Kullanıcı sorgusunu analiz edip uygun tag'ları belirle"""
+        """Analyze user query and determine appropriate tags"""
         message_lower = message.lower()
         
-        # Türkçe ve İngilizce anahtar kelimeler
+        # Turkish and English keywords
         restaurant_keywords = [
             'restoran', 'restaurant', 'yemek', 'food', 'kahvaltı', 'breakfast',
             'akşam yemeği', 'dinner', 'öğle yemeği', 'lunch', 'kafe', 'cafe',
@@ -51,13 +51,13 @@ class QlooIntegration:
             'spor', 'sport', 'yüzme', 'swimming', 'fitness'
         ]
         
-        # Kategori belirleme
+        # Determine categories
         categories = {
             'restaurants': [],
             'activities': []
         }
         
-        # Restoran kategorisi kontrolü
+        # Check restaurant category
         if any(keyword in message_lower for keyword in restaurant_keywords):
             categories['restaurants'] = [
                 'urn:tag:category:place:restaurant',
@@ -65,7 +65,7 @@ class QlooIntegration:
                 'urn:tag:cuisine:restaurant:mediterranean'
             ]
         
-        # Aktivite kategorisi kontrolü
+        # Check activity category
         if any(keyword in message_lower for keyword in activity_keywords):
             categories['activities'] = [
                 'urn:tag:category:place:entertainment',
@@ -73,7 +73,7 @@ class QlooIntegration:
                 'urn:tag:category:place:park'
             ]
         
-        # Eğer hiçbir kategori belirlenemezse, varsayılan olarak her ikisini de ekle
+        # If no category is determined, add both by default
         if not categories['restaurants'] and not categories['activities']:
             categories['restaurants'] = ['urn:tag:category:place:restaurant']
             categories['activities'] = ['urn:tag:category:place:entertainment']
@@ -81,19 +81,19 @@ class QlooIntegration:
         return categories
     
     async def get_personalized_recommendations(self, location: str, user_message: str = "") -> Dict:
-        """Kişiselleştirilmiş öneriler al"""
+        """Get personalized recommendations"""
         
         try:
-            print(f"🔍 {location} için Qloo API'den öneriler alınıyor...")
-            print(f"📝 Kullanıcı mesajı: {user_message}")
+            print(f"🔍 Getting recommendations from Qloo API for {location}...")
+            print(f"📝 User message: {user_message}")
             
-            # Kullanıcı sorgusunu analiz et
+            # Analyze user query
             categories = self._analyze_user_query(user_message)
-            print(f"🏷️ Belirlenen kategoriler: {categories}")
+            print(f"🏷️ Determined categories: {categories}")
             
             loop = asyncio.get_event_loop()
             
-            # Restoran önerileri
+            # Restaurant recommendations
             restaurants = []
             if categories['restaurants']:
                 restaurants_response = await loop.run_in_executor(
@@ -105,7 +105,7 @@ class QlooIntegration:
                 )
                 restaurants = self._process_entities(restaurants_response, "restaurants")
             
-            # Aktivite önerileri
+            # Activity recommendations
             activities = []
             if categories['activities']:
                 activities_response = await loop.run_in_executor(
@@ -124,22 +124,22 @@ class QlooIntegration:
                 "categories_used": categories
             }
             
-            print(f"✅ {len(restaurants)} restoran, {len(activities)} aktivite önerisi alındı")
+            print(f"✅ {len(restaurants)} restaurant, {len(activities)} activity recommendations received")
             return result
             
         except Exception as e:
-            print(f"❌ Qloo API hatası: {e}")
-            raise Exception(f"Qloo API'den veri alınamadı: {str(e)}")
+            print(f"❌ Qloo API error: {e}")
+            raise Exception(f"Could not get data from Qloo API: {str(e)}")
     
     def _get_places_with_tags(self, location: str, tags: List[str], limit: int) -> Dict:
-        """Belirli tag'lar ile place sorgusu"""
+        """Query places with specific tags"""
         try:
-            # İlk tag'ı kullan (API sadece bir tag kabul ediyor)
+            # Use first tag (API only accepts one tag)
             primary_tag = tags[0] if tags else "urn:tag:category:place:restaurant"
             
-            print(f"🔍 Tag ile sorgu: {primary_tag}")
+            print(f"🔍 Query with tag: {primary_tag}")
             
-            # Qloo API'nin gerekli parametrelerini kullan
+            # Use required parameters for Qloo API
             insights = self.qloo.get_insights(
                 entity_type="urn:entity:place",
                 location=location,
@@ -151,44 +151,44 @@ class QlooIntegration:
             )
             return insights
         except Exception as e:
-            print(f"❌ Tag ile API hatası: {e}")
-            # Fallback: genel place sorgusu
+            print(f"❌ API error with tag: {e}")
+            # Fallback: general place query
             return self._get_fallback_places(location, limit)
     
     def _get_fallback_places(self, location: str, limit: int) -> Dict:
-        """Fallback place sorgusu"""
+        """Fallback place query"""
         try:
-            print(f"🔄 Fallback sorgu: {location}")
-            # Genel place sorgusu - sadece lokasyon ile
+            print(f"🔄 Fallback query: {location}")
+            # General place query - only with location
             insights = self.qloo.get_insights(
                 entity_type="urn:entity:place",
                 location=location,
-                limit=limit * 2,  # Daha fazla sonuç al
+                limit=limit * 2,  # Get more results
                 filters={
                     "filter.location.query": location
                 }
             )
             return insights
         except Exception as e:
-            print(f"❌ Fallback place API hatası: {e}")
+            print(f"❌ Fallback place API error: {e}")
             return {"error": str(e)}
     
     def _process_entities(self, response: Dict, entity_type: str) -> List[Dict]:
-        """API yanıtını işle ve kullanılabilir formata dönüştür"""
+        """Process API response and convert to usable format"""
         try:
             if "error" in response:
-                print(f"❌ {entity_type} için API hatası: {response['error']}")
+                print(f"❌ API error for {entity_type}: {response['error']}")
                 return []
             
             entities = response.get("results", {}).get("entities", [])
             processed = []
             
             for entity in entities:
-                # Entity özelliklerini al
+                # Get entity properties
                 properties = entity.get("properties", {})
                 
                 processed_entity = {
-                    "name": entity.get("name", "Bilinmeyen"),
+                    "name": entity.get("name", "Unknown"),
                     "description": properties.get("description", ""),
                     "popularity": entity.get("popularity", 0.5),
                     "properties": {
@@ -205,15 +205,15 @@ class QlooIntegration:
             return processed
             
         except Exception as e:
-            print(f"❌ {entity_type} verilerini işlerken hata: {e}")
+            print(f"❌ Error processing {entity_type} data: {e}")
             return []
     
     async def get_location_insights(self, location: str) -> Dict:
-        """Lokasyon bazlı içgörüler al"""
+        """Get location-based insights"""
         try:
             loop = asyncio.get_event_loop()
             
-            # Genel lokasyon içgörüleri
+            # General location insights
             insights = await loop.run_in_executor(
                 None,
                 self.qloo.get_insights,
@@ -232,10 +232,10 @@ class QlooIntegration:
             }
             
         except Exception as e:
-            raise Exception(f"Lokasyon içgörüleri alınamadı: {str(e)}")
+            raise Exception(f"Could not get location insights: {str(e)}")
     
     async def search_entities(self, query: str, entity_type: str = "urn:entity:place") -> Dict:
-        """Varlık arama"""
+        """Search entities"""
         try:
             loop = asyncio.get_event_loop()
             results = await loop.run_in_executor(
@@ -252,16 +252,16 @@ class QlooIntegration:
             }
             
         except Exception as e:
-            raise Exception(f"Arama hatası: {str(e)}")
+            raise Exception(f"Search error: {str(e)}")
     
     async def get_trending_places(self, location: str, limit: int = 5) -> Dict:
-        """Trend olan yerleri al"""
+        """Get trending places"""
         try:
-            print(f"📈 {location} için trend olan yerler alınıyor...")
+            print(f"📈 Getting trending places for {location}...")
             
             loop = asyncio.get_event_loop()
             
-            # Qloo API'den trend olan place'leri al
+            # Get trending places from Qloo API
             trending_response = await loop.run_in_executor(
                 None,
                 self.qloo.get_trending_entities,
@@ -277,21 +277,21 @@ class QlooIntegration:
                 "location": location
             }
             
-            print(f"✅ {len(places)} trend olan yer alındı")
+            print(f"✅ {len(places)} trending places received")
             return result
             
         except Exception as e:
-            print(f"❌ Trend olan yerler hatası: {e}")
-            raise Exception(f"Trend olan yerler alınamadı: {str(e)}")
+            print(f"❌ Trending places error: {e}")
+            raise Exception(f"Could not get trending places: {str(e)}")
     
     async def get_movie_recommendations(self, location: str, limit: int = 5) -> Dict:
-        """Film önerileri al"""
+        """Get movie recommendations"""
         try:
-            print(f"🎬 Film önerileri alınıyor...")
+            print(f"🎬 Getting movie recommendations...")
             
             loop = asyncio.get_event_loop()
             
-            # Qloo API'den film önerileri al
+            # Get movie recommendations from Qloo API
             movies_response = await loop.run_in_executor(
                 None,
                 self.qloo.get_insights,
@@ -311,21 +311,21 @@ class QlooIntegration:
                 "location": location
             }
             
-            print(f"✅ {len(movies)} film önerisi alındı")
+            print(f"✅ {len(movies)} movie recommendations received")
             return result
             
         except Exception as e:
-            print(f"❌ Film önerileri hatası: {e}")
-            raise Exception(f"Film önerileri alınamadı: {str(e)}")
+            print(f"❌ Movie recommendations error: {e}")
+            raise Exception(f"Could not get movie recommendations: {str(e)}")
     
     async def get_music_recommendations(self, location: str, limit: int = 5) -> Dict:
-        """Müzik önerileri al"""
+        """Get music recommendations"""
         try:
-            print(f"🎵 Müzik önerileri alınıyor...")
+            print(f"🎵 Getting music recommendations...")
             
             loop = asyncio.get_event_loop()
             
-            # Qloo API'den müzik önerileri al
+            # Get music recommendations from Qloo API
             music_response = await loop.run_in_executor(
                 None,
                 self.qloo.get_insights,
@@ -345,21 +345,21 @@ class QlooIntegration:
                 "location": location
             }
             
-            print(f"✅ {len(music)} müzik önerisi alındı")
+            print(f"✅ {len(music)} music recommendations received")
             return result
             
         except Exception as e:
-            print(f"❌ Müzik önerileri hatası: {e}")
-            raise Exception(f"Müzik önerileri alınamadı: {str(e)}")
+            print(f"❌ Music recommendations error: {e}")
+            raise Exception(f"Could not get music recommendations: {str(e)}")
     
     async def get_book_recommendations(self, location: str, limit: int = 5) -> Dict:
-        """Kitap önerileri al"""
+        """Get book recommendations"""
         try:
-            print(f"📚 Kitap önerileri alınıyor...")
+            print(f"📚 Getting book recommendations...")
             
             loop = asyncio.get_event_loop()
             
-            # Qloo API'den kitap önerileri al
+            # Get book recommendations from Qloo API
             books_response = await loop.run_in_executor(
                 None,
                 self.qloo.get_insights,
@@ -379,21 +379,21 @@ class QlooIntegration:
                 "location": location
             }
             
-            print(f"✅ {len(books)} kitap önerisi alındı")
+            print(f"✅ {len(books)} book recommendations received")
             return result
             
         except Exception as e:
-            print(f"❌ Kitap önerileri hatası: {e}")
-            raise Exception(f"Kitap önerileri alınamadı: {str(e)}")
+            print(f"❌ Book recommendations error: {e}")
+            raise Exception(f"Could not get book recommendations: {str(e)}")
     
     async def get_game_recommendations(self, location: str, limit: int = 5) -> Dict:
-        """Oyun önerileri al"""
+        """Get game recommendations"""
         try:
-            print(f"🎮 Oyun önerileri alınıyor...")
+            print(f"🎮 Getting game recommendations...")
             
             loop = asyncio.get_event_loop()
             
-            # Qloo API'den oyun önerileri al
+            # Get game recommendations from Qloo API
             games_response = await loop.run_in_executor(
                 None,
                 self.qloo.get_insights,
@@ -413,21 +413,21 @@ class QlooIntegration:
                 "location": location
             }
             
-            print(f"✅ {len(games)} oyun önerisi alındı")
+            print(f"✅ {len(games)} game recommendations received")
             return result
             
         except Exception as e:
-            print(f"❌ Oyun önerileri hatası: {e}")
-            raise Exception(f"Oyun önerileri alınamadı: {str(e)}")
+            print(f"❌ Game recommendations error: {e}")
+            raise Exception(f"Could not get game recommendations: {str(e)}")
     
     async def get_demographic_analysis(self, location: str) -> Dict:
-        """Demografik analiz al"""
+        """Get demographic analysis"""
         try:
-            print(f"👥 {location} için demografik analiz alınıyor...")
+            print(f"👥 Getting demographic analysis for {location}...")
             
             loop = asyncio.get_event_loop()
             
-            # Qloo API'den demografik analiz al
+            # Get demographic analysis from Qloo API
             demographics_response = await loop.run_in_executor(
                 None,
                 self.qloo.get_demographic_insights,
@@ -443,28 +443,28 @@ class QlooIntegration:
                 "location": location
             }
             
-            print(f"✅ Demografik analiz alındı")
+            print(f"✅ Demographic analysis received")
             return result
             
         except Exception as e:
-            print(f"❌ Demografik analiz hatası: {e}")
-            raise Exception(f"Demografik analiz alınamadı: {str(e)}")
+            print(f"❌ Demographic analysis error: {e}")
+            raise Exception(f"Could not get demographic analysis: {str(e)}")
     
     def _process_demographics(self, response: Dict) -> List[Dict]:
-        """Demografik verileri işle"""
+        """Process demographic data"""
         try:
             if "error" in response:
-                print(f"❌ Demografik API hatası: {response['error']}")
+                print(f"❌ Demographic API error: {response['error']}")
                 return []
             
-            # Demografik verileri işle
+            # Process demographic data
             demographics = response.get("results", {}).get("demographics", [])
             processed = []
             
             for demo in demographics:
                 processed_demo = {
-                    "name": demo.get("category", "Bilinmeyen"),
-                    "description": f"Yaş grubu: {demo.get('age_group', 'N/A')}, Cinsiyet: {demo.get('gender', 'N/A')}",
+                    "name": demo.get("category", "Unknown"),
+                    "description": f"Age group: {demo.get('age_group', 'N/A')}, Gender: {demo.get('gender', 'N/A')}",
                     "percentage": demo.get("percentage", 0),
                     "affinity_score": demo.get("affinity_score", 0)
                 }
@@ -473,5 +473,5 @@ class QlooIntegration:
             return processed
             
         except Exception as e:
-            print(f"❌ Demografik veri işleme hatası: {e}")
+            print(f"❌ Demographic data processing error: {e}")
             return [] 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-AI Concierge Çalıştırma Scripti
-===============================
+AI Concierge Run Script
+=======================
 
-Bu script AI Concierge uygulamasını başlatır.
+This script starts the AI Concierge application.
 """
 
 import os
@@ -12,60 +12,60 @@ import uvicorn
 from pathlib import Path
 
 def check_requirements():
-    """Gerekli dosyaları kontrol et"""
-    print("🔍 Gerekli dosyalar kontrol ediliyor...")
+    """Check required files"""
+    print("🔍 Checking required files...")
     
-    # .env dosyası kontrolü
+    # .env file check
     if not os.path.exists(".env"):
-        print("⚠️  .env dosyası bulunamadı!")
-        print("📝 env.example dosyasını .env olarak kopyalayın ve OPENAI_API_KEY ekleyin")
+        print("⚠️  .env file not found!")
+        print("📝 Copy env.example to .env and add OPENAI_API_KEY")
         return False
     
-    # Static dosyalar kontrolü
+    # Static files check
     if not os.path.exists("static/chat.html"):
-        print("⚠️  static/chat.html dosyası bulunamadı!")
+        print("⚠️  static/chat.html file not found!")
         return False
     
-    print("✅ Tüm dosyalar mevcut")
+    print("✅ All files present")
     return True
 
 def check_dependencies():
-    """Bağımlılıkları kontrol et"""
-    print("📦 Bağımlılıklar kontrol ediliyor...")
+    """Check dependencies"""
+    print("📦 Checking dependencies...")
     
     try:
         import fastapi
         import uvicorn
         import langchain
         import openai
-        print("✅ Tüm bağımlılıklar yüklü")
+        print("✅ All dependencies installed")
         return True
     except ImportError as e:
-        print(f"❌ Eksik bağımlılık: {e}")
-        print("💡 pip install -r requirements.txt komutunu çalıştırın")
+        print(f"❌ Missing dependency: {e}")
+        print("💡 Run pip install -r requirements.txt")
         return False
 
 def main():
-    """Ana fonksiyon"""
-    print("🏨 AI Concierge Başlatılıyor...")
+    """Main function"""
+    print("🏨 Starting AI Concierge...")
     print("=" * 40)
     
-    # Kontroller
+    # Checks
     if not check_requirements():
-        print("\n❌ Gerekli dosyalar eksik!")
+        print("\n❌ Required files missing!")
         return 1
     
     if not check_dependencies():
-        print("\n❌ Bağımlılıklar eksik!")
+        print("\n❌ Dependencies missing!")
         return 1
     
-    print("\n🚀 Uygulama başlatılıyor...")
-    print("📱 Tarayıcıda http://localhost:8000 adresini açın")
-    print("🛑 Durdurmak için Ctrl+C tuşlayın")
+    print("\n🚀 Starting application...")
+    print("📱 Open http://localhost:8000 in your browser")
+    print("🛑 Press Ctrl+C to stop")
     print("=" * 40)
     
     try:
-        # Uygulamayı başlat
+        # Start application
         uvicorn.run(
             "app.main:app",
             host="0.0.0.0",
@@ -74,10 +74,10 @@ def main():
             log_level="info"
         )
     except KeyboardInterrupt:
-        print("\n👋 Uygulama durduruldu")
+        print("\n👋 Application stopped")
         return 0
     except Exception as e:
-        print(f"\n❌ Uygulama başlatılamadı: {e}")
+        print(f"\n❌ Could not start application: {e}")
         return 1
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+import os
 
 class Settings(BaseSettings):
     """AI Concierge uygulama ayarları"""
@@ -22,6 +23,7 @@ class Settings(BaseSettings):
     
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 # Global settings instance
 settings = Settings() 

@@ -5,26 +5,26 @@ from app.config import Settings
 
 @pytest.mark.asyncio
 async def test_concierge_initialization():
-    """Concierge başlatma testi"""
+    """Concierge initialization test"""
     try:
         settings = Settings()
         concierge = AIConcierge(settings)
         assert concierge is not None
         assert concierge.config is not None
-        print("✅ Concierge başarıyla başlatıldı")
+        print("✅ Concierge successfully started")
     except Exception as e:
-        print(f"❌ Concierge başlatılamadı: {e}")
-        # API key olmadığında bu normal olabilir
+        print(f"❌ Failed to start Concierge: {e}")
+        # This might be normal when API key is missing
         assert "API key" in str(e) or "OpenAI" in str(e)
 
 @pytest.mark.asyncio
 async def test_qloo_integration():
-    """Qloo entegrasyon testi"""
+    """Qloo integration test"""
     try:
         settings = Settings()
         concierge = AIConcierge(settings)
         
-        # Mock öneriler al
+        # Get mock recommendations
         recommendations = await concierge.qloo.get_personalized_recommendations("Istanbul")
         
         assert recommendations is not None
@@ -33,16 +33,16 @@ async def test_qloo_integration():
         assert len(recommendations["restaurants"]) > 0
         assert len(recommendations["activities"]) > 0
         
-        print("✅ Qloo entegrasyonu çalışıyor")
-        print(f"   - {len(recommendations['restaurants'])} restoran önerisi")
-        print(f"   - {len(recommendations['activities'])} aktivite önerisi")
+        print("✅ Qloo integration working")
+        print(f"   - {len(recommendations['restaurants'])} restaurant recommendations")
+        print(f"   - {len(recommendations['activities'])} activity recommendations")
         
     except Exception as e:
-        print(f"❌ Qloo entegrasyon hatası: {e}")
+        print(f"❌ Qloo integration error: {e}")
 
 @pytest.mark.asyncio
 async def test_hotel_info():
-    """Otel bilgileri testi"""
+    """Hotel information test"""
     try:
         settings = Settings()
         concierge = AIConcierge(settings)
@@ -55,39 +55,39 @@ async def test_hotel_info():
         assert "amenities" in hotel_info
         assert "services" in hotel_info
         
-        print("✅ Otel bilgileri alındı")
-        print(f"   - Otel: {hotel_info['name']}")
-        print(f"   - Lokasyon: {hotel_info['location']}")
-        print(f"   - {len(hotel_info['amenities'])} özellik")
-        print(f"   - {len(hotel_info['services'])} hizmet")
+        print("✅ Hotel information retrieved")
+        print(f"   - Hotel: {hotel_info['name']}")
+        print(f"   - Location: {hotel_info['location']}")
+        print(f"   - {len(hotel_info['amenities'])} amenities")
+        print(f"   - {len(hotel_info['services'])} services")
         
     except Exception as e:
-        print(f"❌ Otel bilgileri hatası: {e}")
+        print(f"❌ Hotel information error: {e}")
 
 @pytest.mark.asyncio
 async def test_quick_recommendations():
-    """Hızlı öneriler testi"""
+    """Quick recommendations test"""
     try:
         settings = Settings()
         concierge = AIConcierge(settings)
         
-        # Restoran önerileri
+        # Restaurant recommendations
         restaurants = await concierge.get_quick_recommendations("restaurants")
         assert isinstance(restaurants, list)
         
-        # Aktivite önerileri
+        # Activity recommendations
         activities = await concierge.get_quick_recommendations("activities")
         assert isinstance(activities, list)
         
-        print("✅ Hızlı öneriler çalışıyor")
-        print(f"   - {len(restaurants)} restoran önerisi")
-        print(f"   - {len(activities)} aktivite önerisi")
+        print("✅ Quick recommendations working")
+        print(f"   - {len(restaurants)} restaurant recommendations")
+        print(f"   - {len(activities)} activity recommendations")
         
     except Exception as e:
-        print(f"❌ Hızlı öneriler hatası: {e}")
+        print(f"❌ Quick recommendations error: {e}")
 
 def test_settings():
-    """Ayarlar testi"""
+    """Settings test"""
     try:
         settings = Settings()
         
@@ -96,20 +96,20 @@ def test_settings():
         assert settings.qloo_api_key == "mo8xSbrp5xOwLs7iYIQG3oLRVxMwIxluONFfDlkbZaw"
         assert settings.qloo_base_url == "https://hackathon.api.qloo.com"
         
-        print("✅ Ayarlar doğru yapılandırıldı")
+        print("✅ Settings correctly configured")
         
     except Exception as e:
-        print(f"❌ Ayarlar hatası: {e}")
+        print(f"❌ Settings error: {e}")
 
 if __name__ == "__main__":
     print("🧪 AI Concierge Test Suite")
     print("=" * 40)
     
-    # Testleri çalıştır
+    # Run tests
     asyncio.run(test_settings())
     asyncio.run(test_concierge_initialization())
     asyncio.run(test_qloo_integration())
     asyncio.run(test_hotel_info())
     asyncio.run(test_quick_recommendations())
     
-    print("\n✅ Tüm testler tamamlandı!") 
+    print("\n✅ All tests completed!") 

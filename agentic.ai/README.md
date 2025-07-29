@@ -1,47 +1,47 @@
-# 🏨 AI Concierge - Basit Chat Sistemi
+# 🏨 AI Concierge - Simple Chat System
 
-Otellerde müşterileri karşılayan basit AI Concierge chat sistemi. FastAPI, LangChain, LLM ve Qloo API entegrasyonu ile geliştirilmiş minimal konuk deneyimi platformu.
+A simple AI Concierge chat system for welcoming customers in hotels. Developed with FastAPI, LangChain, LLM, and Qloo API integration for a minimal guest experience platform.
 
-## 🎯 Özellikler
+## 🎯 Features
 
-### 🤖 AI Concierge Chat Yetenekleri
-- **Kişiselleştirilmiş Öneriler**: Qloo API ile kültürel zeka tabanlı öneriler
-- **Çok Dilli Destek**: Türkçe, İngilizce ve diğer dillerde konuşma
-- **Lokasyon Bazlı Öneriler**: Otel çevresindeki restoran, aktivite ve mekanlar
-- **Otel Bilgileri**: Oda servisi, spa, havuz, fitness merkezi bilgileri
-- **Basit Chat Arayüzü**: Web tabanlı chat arayüzü
+### 🤖 AI Concierge Chat Capabilities
+- **Personalized Recommendations**: Cultural intelligence-based recommendations with Qloo API
+- **Multi-language Support**: Conversation in Turkish, English, and other languages
+- **Location-based Recommendations**: Restaurants, activities, and venues around the hotel
+- **Hotel Information**: Room service, spa, pool, fitness center information
+- **Simple Chat Interface**: Web-based chat interface
 
-### 🏗️ Teknik Mimari
-- **FastAPI**: Hızlı ve modern web API framework
-- **LangChain**: LLM entegrasyonu ve prompt yönetimi
-- **Qloo API**: Kültürel zeka ve kişiselleştirilmiş öneriler
-- **OpenAI GPT**: Chat modeli
-- **Basit Dosya Tabanlı Storage**: JSON dosyaları ile veri saklama
+### 🏗️ Technical Architecture
+- **FastAPI**: Fast and modern web API framework
+- **LangChain**: LLM integration and prompt management
+- **Qloo API**: Cultural intelligence and personalized recommendations
+- **Google Gemini**: Chat model
+- **Simple File-based Storage**: Data storage with JSON files
 
-## 📁 Basit Proje Yapısı
+## 📁 Simple Project Structure
 
 ```
 ai.concierge/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py                 # FastAPI uygulaması
-│   ├── config.py              # Konfigürasyon ayarları
+│   ├── main.py                 # FastAPI application
+│   ├── config.py              # Configuration settings
 │   ├── core/
 │   │   ├── __init__.py
-│   │   ├── concierge.py       # Ana Concierge sınıfı
-│   │   ├── qloo_integration.py # Qloo API entegrasyonu
-│   │   └── prompt_templates.py # Prompt şablonları
+│   │   ├── concierge.py       # Main Concierge class
+│   │   ├── qloo_integration.py # Qloo API integration
+│   │   └── prompt_templates.py # Prompt templates
 │   ├── schemas/
 │   │   ├── __init__.py
-│   │   └── chat.py           # Chat şemaları
+│   │   └── chat.py           # Chat schemas
 │   └── utils/
 │       ├── __init__.py
 │       └── logger.py         # Logging utility
 ├── data/
-│   ├── guests.json           # Konuk verileri
-│   └── chat_history.json     # Chat geçmişi
+│   ├── guests.json           # Guest data
+│   └── chat_history.json     # Chat history
 ├── static/
-│   └── chat.html             # Basit chat arayüzü
+│   └── chat.html             # Simple chat interface
 ├── tests/
 │   └── test_concierge.py
 ├── requirements.txt
@@ -49,49 +49,49 @@ ai.concierge/
 └── README.md
 ```
 
-## 🚀 Hızlı Kurulum
+## 🚀 Quick Setup
 
-### 1. Gereksinimler
+### 1. Requirements
 ```bash
-# Python 3.9+ gerekli
+# Python 3.9+ required
 python --version
 
-# Virtual environment oluştur
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # venv\Scripts\activate   # Windows
 
-# Bağımlılıkları yükle
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Ortam Değişkenleri
+### 2. Environment Variables
 ```bash
-# .env dosyasını oluştur
+# Create .env file
 cp env.example .env
 
-# OpenAI API anahtarını ekle
-OPENAI_API_KEY=your_openai_api_key_here
+# Add Google Gemini API key
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-### 3. Uygulamayı Çalıştır
+### 3. Run the Application
 ```bash
-# Development modunda
+# In development mode
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# Tarayıcıda aç
+# Open in browser
 # http://localhost:8000
 ```
 
-## 🔧 Konfigürasyon
+## 🔧 Configuration
 
-### Ana Konfigürasyon (`app/config.py`)
+### Main Configuration (`app/config.py`)
 ```python
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # API Keys
-    openai_api_key: str
+    gemini_api_key: str
     qloo_api_key: str = "mo8xSbrp5xOwLs7iYIQG3oLRVxMwIxluONFfDlkbZaw"
     qloo_base_url: str = "https://hackathon.api.qloo.com"
     
@@ -100,7 +100,7 @@ class Settings(BaseSettings):
     hotel_location: str = "Istanbul, Turkey"
     
     # LLM Configuration
-    llm_model: str = "gpt-4"
+    llm_model: str = "gemini-2.0-flash"
     max_tokens: int = 1000
     temperature: float = 0.7
     
@@ -108,9 +108,9 @@ class Settings(BaseSettings):
         env_file = ".env"
 ```
 
-## 🤖 AI Concierge Sınıfı
+## 🤖 AI Concierge Class
 
-### Ana Concierge Sınıfı (`app/core/concierge.py`)
+### Main Concierge Class (`app/core/concierge.py`)
 ```python
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
@@ -132,14 +132,14 @@ class AIConcierge:
         )
     
     async def process_guest_request(self, guest_id: str, message: str):
-        """Konuk isteğini işle ve yanıt ver"""
+        """Process guest request and return response"""
         
-        # Qloo'dan kişiselleştirilmiş öneriler al
+        # Get personalized recommendations from Qloo
         recommendations = await self.qloo.get_personalized_recommendations(
             location=self.config.hotel_location
         )
         
-        # LangChain ile yanıt oluştur
+        # Generate response with LangChain
         response = await self.chain.arun(
             guest_message=message,
             recommendations=recommendations,
@@ -164,13 +164,13 @@ from app.config import Settings
 app = FastAPI(title="AI Concierge", version="1.0.0")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Konfigürasyon
+# Configuration
 settings = Settings()
 concierge = AIConcierge(settings)
 
 @app.get("/", response_class=HTMLResponse)
 async def chat_interface():
-    """Chat arayüzü"""
+    """Chat interface"""
     with open("static/chat.html", "r") as f:
         return HTMLResponse(content=f.read())
 
@@ -191,9 +191,9 @@ async def chat_endpoint(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 ```
 
-## 📊 Qloo Entegrasyonu
+## 📊 Qloo Integration
 
-### Qloo Entegrasyon Sınıfı (`app/core/qloo_integration.py`)
+### Qloo Integration Class (`app/core/qloo_integration.py`)
 ```python
 import sys
 import os
@@ -210,9 +210,9 @@ class QlooIntegration:
         self.qloo = QlooLLMIntegration(qloo_config)
     
     async def get_personalized_recommendations(self, location: str):
-        """Kişiselleştirilmiş öneriler al"""
+        """Get personalized recommendations"""
         
-        # Restoran önerileri
+        # Restaurant recommendations
         restaurants = await self.qloo.get_insights(
             entity_type="urn:entity:place",
             location=location,
@@ -220,7 +220,7 @@ class QlooIntegration:
             limit=5
         )
         
-        # Aktivite önerileri
+        # Activity recommendations
         activities = await self.qloo.get_insights(
             entity_type="urn:entity:place",
             location=location,
@@ -234,34 +234,35 @@ class QlooIntegration:
         }
 ```
 
-## 📝 Prompt Şablonları
+## 📝 Prompt Templates
 
-### Prompt Şablonları (`app/core/prompt_templates.py`)
+### Prompt Templates (`app/core/prompt_templates.py`)
 ```python
 from langchain.prompts import PromptTemplate
 
 CONCIERGE_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["guest_message", "recommendations", "hotel_info", "location"],
     template="""
-    Sen {hotel_info} otelinin AI Concierge'ısın. Konuklara yardımcı olmak için buradasın.
+    You are the AI Concierge of {hotel_info} hotel. You are here to help guests.
     
-    Otel Lokasyonu: {location}
+    Hotel Location: {location}
     
-    Qloo'dan gelen öneriler:
-    Restoranlar: {recommendations[restaurants]}
-    Aktiviteler: {recommendations[activities]}
+    Recommendations from Qloo:
+    Restaurants: {recommendations[restaurants]}
+    Activities: {recommendations[activities]}
     
-    Konuk Mesajı: {guest_message}
+    Guest Message: {guest_message}
     
-    Lütfen konuğa yardımcı ol. Türkçe yanıt ver. Kişiselleştirilmiş öneriler sun.
-    Otel hizmetleri, restoran önerileri, aktiviteler hakkında bilgi ver.
+    Please help the guest. Always respond in English. Provide personalized recommendations.
+    Provide information about hotel services, restaurant recommendations, and activities.
+    Use a friendly and professional tone.
     """
 )
 ```
 
-## 📋 Veri Şemaları
+## 📋 Data Schemas
 
-### Chat Şemaları (`app/schemas/chat.py`)
+### Chat Schemas (`app/schemas/chat.py`)
 ```python
 from pydantic import BaseModel
 from typing import Optional
@@ -277,9 +278,9 @@ class ChatResponse(BaseModel):
     timestamp: datetime = datetime.now()
 ```
 
-## 🎨 Basit Chat Arayüzü
+## 🎨 Simple Chat Interface
 
-### HTML Arayüzü (`static/chat.html`)
+### HTML Interface (`static/chat.html`)
 ```html
 <!DOCTYPE html>
 <html>
@@ -302,8 +303,8 @@ class ChatResponse(BaseModel):
         <h1>🏨 AI Concierge</h1>
         <div class="chat-box" id="chatBox"></div>
         <div class="input-area">
-            <input type="text" id="messageInput" placeholder="Mesajınızı yazın...">
-            <button onclick="sendMessage()">Gönder</button>
+            <input type="text" id="messageInput" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
         </div>
     </div>
 
@@ -313,7 +314,7 @@ class ChatResponse(BaseModel):
             const message = input.value;
             if (!message) return;
 
-            // Kullanıcı mesajını göster
+            // Show user message
             addMessage(message, 'user');
             input.value = '';
 
@@ -330,7 +331,7 @@ class ChatResponse(BaseModel):
                 const data = await response.json();
                 addMessage(data.message, 'bot');
             } catch (error) {
-                addMessage('Üzgünüm, bir hata oluştu.', 'bot');
+                addMessage('Sorry, an error occurred.', 'bot');
             }
         }
 
@@ -343,7 +344,7 @@ class ChatResponse(BaseModel):
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Enter tuşu ile gönderme
+        // Send with Enter key
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();
@@ -354,9 +355,9 @@ class ChatResponse(BaseModel):
 </html>
 ```
 
-## 🧪 Test
+## 🧪 Testing
 
-### Test Dosyası (`tests/test_concierge.py`)
+### Test File (`tests/test_concierge.py`)
 ```python
 import pytest
 from app.core.concierge import AIConcierge
@@ -364,53 +365,53 @@ from app.config import Settings
 
 @pytest.mark.asyncio
 async def test_concierge_response():
-    """Concierge yanıt testi"""
+    """Concierge response test"""
     settings = Settings()
     concierge = AIConcierge(settings)
     
     response = await concierge.process_guest_request(
         guest_id="test_guest",
-        message="Merhaba, otel hakkında bilgi alabilir miyim?"
+        message="Hello, can I get information about the hotel?"
     )
     
     assert response is not None
     assert len(response) > 10
 ```
 
-## 🚀 Çalıştırma
+## 🚀 Running
 
 ```bash
-# 1. Bağımlılıkları yükle
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. .env dosyasını oluştur ve API anahtarını ekle
+# 2. Create .env file and add API key
 cp env.example .env
-# .env dosyasını düzenle ve OPENAI_API_KEY ekle
+# Edit .env file and add GEMINI_API_KEY
 
-# 3. Uygulamayı çalıştır
+# 3. Run the application
 uvicorn app.main:app --reload
 
-# 4. Tarayıcıda aç
+# 4. Open in browser
 # http://localhost:8000
 ```
 
-## 📊 Özellikler
+## 📊 Features
 
-- ✅ **Basit Chat Arayüzü**: Web tabanlı chat
-- ✅ **Qloo Entegrasyonu**: Kişiselleştirilmiş öneriler
-- ✅ **LangChain**: LLM yönetimi
+- ✅ **Simple Chat Interface**: Web-based chat
+- ✅ **Qloo Integration**: Personalized recommendations
+- ✅ **LangChain**: LLM management
 - ✅ **FastAPI**: Modern API framework
-- ✅ **Çok Dilli Destek**: Türkçe/İngilizce
-- ✅ **Lokasyon Bazlı Öneriler**: Restoran ve aktivite önerileri
+- ✅ **Multi-language Support**: Turkish/English
+- ✅ **Location-based Recommendations**: Restaurant and activity recommendations
 
-## 🔧 Geliştirme
+## 🔧 Development
 
-Bu basit yapı üzerine şu özellikler eklenebilir:
-- Konuk profilleri
-- Chat geçmişi saklama
-- Rezervasyon sistemi
-- Daha gelişmiş UI
-- Ses entegrasyonu
-- Mobil uygulama
+The following features can be added to this simple structure:
+- Guest profiles
+- Chat history storage
+- Reservation system
+- More advanced UI
+- Voice integration
+- Mobile application
 
-Bu minimal yapı ile hızlıca çalışan bir AI Concierge sistemi oluşturabilirsiniz! 
+You can quickly create a working AI Concierge system with this minimal structure! 

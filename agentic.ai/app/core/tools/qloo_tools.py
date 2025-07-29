@@ -14,21 +14,21 @@ class QlooRestaurantTool(BaseTool):
     def __init__(self, qloo_integration: QlooIntegration):
         super().__init__(
             name="qloo_restaurant_api",
-            description="Restoran önerileri al"
+            description="Get restaurant recommendations"
         )
         self.qloo = qloo_integration
     
     async def execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Restoran önerileri al"""
+        """Get restaurant recommendations"""
         try:
             location = parameters.get("location", "Istanbul")
             cuisine = parameters.get("cuisine")
             limit = parameters.get("limit", 5)
             
-            # Qloo API çağrısı
+            # Qloo API call
             result = await self.qloo.get_personalized_recommendations(
                 location=location,
-                user_message=f"restoran {cuisine or ''}"
+                user_message=f"restaurant {cuisine or ''}"
             )
             
             return {
@@ -50,12 +50,12 @@ class QlooActivityTool(BaseTool):
     def __init__(self, qloo_integration: QlooIntegration):
         super().__init__(
             name="qloo_activity_api", 
-            description="Aktivite önerileri al"
+            description="Get activity recommendations"
         )
         self.qloo = qloo_integration
     
     async def execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Aktivite önerileri al"""
+        """Get activity recommendations"""
         try:
             location = parameters.get("location", "Istanbul")
             activity_type = parameters.get("activity_type")
@@ -63,7 +63,7 @@ class QlooActivityTool(BaseTool):
             
             result = await self.qloo.get_personalized_recommendations(
                 location=location,
-                user_message=f"aktivite {activity_type or ''}"
+                user_message=f"activity {activity_type or ''}"
             )
             
             return {

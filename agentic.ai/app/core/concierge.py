@@ -4,32 +4,32 @@ from .agent.concierge_agent import LLMCentricConciergeAgent
 logger = logging.getLogger(__name__)
 
 class AIConcierge:
-    """AI Concierge ana sınıfı - LLM Agent kullanacak"""
+    """Main AI Concierge class - uses LLM Agent"""
     
     def __init__(self, config):
         self.config = config
         
-        # LLM merkezli agent'ı kullan
+        # Use LLM-centric agent
         self.agent = LLMCentricConciergeAgent(config)
-        logger.info("LLM Merkezli AI Concierge başlatıldı")
+        logger.info("LLM-Centric AI Concierge started")
     
     async def process_guest_request(self, guest_id: str, message: str) -> str:
-        """Konuk isteğini LLM merkezli agent ile işle"""
+        """Process guest request with LLM-centric agent"""
         try:
-            logger.info(f"Konuk {guest_id} için LLM agent isteği: {message[:50]}...")
+            logger.info(f"LLM agent request for guest {guest_id}: {message[:50]}...")
             
-            # LLM merkezli agent'ı kullan
+            # Use LLM-centric agent
             response = await self.agent.process_request(message)
             
-            logger.info(f"LLM agent yanıtı oluşturuldu: {response[:50]}...")
+            logger.info(f"LLM agent response generated: {response[:50]}...")
             return response
             
         except Exception as e:
-            logger.error(f"LLM agent hatası: {e}")
-            return f"Üzgünüm, şu anda size yardımcı olamıyorum. Hata: {str(e)}"
+            logger.error(f"LLM agent error: {e}")
+            return f"Sorry, I cannot help you right now. Error: {str(e)}"
     
     async def get_hotel_info(self) -> dict:
-        """Otel bilgilerini döndür"""
+        """Return hotel information"""
         return {
             "name": self.config.hotel_name,
             "location": self.config.hotel_location,
@@ -52,12 +52,12 @@ class AIConcierge:
         }
     
     async def get_quick_recommendations(self, category: str = "restaurants") -> list:
-        """Hızlı öneriler al"""
+        """Get quick recommendations"""
         try:
-            # LLM agent ile öneriler al
-            response = await self.agent.process_request(f"{category} önerileri")
+            # Get recommendations with LLM agent
+            response = await self.agent.process_request(f"{category} recommendations")
             return [{"name": "LLM Agent Response", "description": response}]
                 
         except Exception as e:
-            logger.error(f"Öneriler alınırken hata: {e}")
+            logger.error(f"Error getting recommendations: {e}")
             return [] 

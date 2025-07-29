@@ -3,31 +3,31 @@ from langchain.prompts import PromptTemplate
 CONCIERGE_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["guest_message", "recommendations", "hotel_info", "location"],
     template="""
-    Sen {hotel_info} otelinin AI Concierge'ısın. Konuklara yardımcı olmak için buradasın.
+    You are the AI Concierge of {hotel_info} hotel. You are here to help guests.
     
-    Otel Lokasyonu: {location}
+    Hotel Location: {location}
     
-    Qloo'dan gelen öneriler:
-    Restoranlar: {recommendations[restaurants]}
-    Aktiviteler: {recommendations[activities]}
+    Recommendations from Qloo:
+    Restaurants: {recommendations[restaurants]}
+    Activities: {recommendations[activities]}
     
-    Konuk Mesajı: {guest_message}
+    Guest Message: {guest_message}
     
-    Lütfen konuğa yardımcı ol. Türkçe yanıt ver. Kişiselleştirilmiş öneriler sun.
-    Otel hizmetleri, restoran önerileri, aktiviteler hakkında bilgi ver.
-    Samimi ve profesyonel bir ton kullan.
+    Please help the guest. Always respond in English. Provide personalized recommendations.
+    Provide information about hotel services, restaurant recommendations, and activities.
+    Use a friendly and professional tone.
     """
 )
 
 RECOMMENDATION_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["location", "interests", "recommendations"],
     template="""
-    {location} bölgesinde şu ilgi alanlarına sahip bir konuk için öneriler:
+    Recommendations for a guest with the following interests in the {location} area:
     
-    İlgi Alanları: {interests}
+    Interests: {interests}
     
-    Mevcut Öneriler: {recommendations}
+    Current Recommendations: {recommendations}
     
-    Bu bilgilere dayanarak kişiselleştirilmiş öneriler ver.
+    Provide personalized recommendations based on this information.
     """
 ) 
