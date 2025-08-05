@@ -1,123 +1,114 @@
 #!/usr/bin/env python3
 """
-Gemini API Test Script
-======================
+Test Gemini 2.0 Flash API and Concierge Integration
+===================================================
 
-This script tests the Gemini 2.0 Flash API.
+This test validates the Gemini 2.0 Flash API integration with the Concierge.
 """
 
-import requests
-import json
 import os
+import sys
+import asyncio
 from dotenv import load_dotenv
 
 # Load .env file
 load_dotenv()
 
-def test_gemini_api():
-    """Test Gemini API"""
+# Add project root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app.core.llm.gemini_wrapper import GeminiWrapper
+from app.config import settings
+
+async def test_gemini_api():
+    """Test Gemini API integration"""
+    print("🧪 Testing OpenRouter Gemini API Integration...")
     
-    api_key = os.getenv("GEMINI_API_KEY")
+    # Check API key
+    api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        print("❌ GEMINI_API_KEY not found!")
+        print("❌ OPENROUTER_API_KEY not found!")
         return False
     
-    print("🧪 Gemini 2.0 Flash API Test")
-    print("=" * 40)
+    print(f"✅ API Key found: {api_key[:20]}...")
     
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    # Initialize wrapper
+    wrapper = GeminiWrapper(settings)
     
-    headers = {
-        'Content-Type': 'application/json',
-        'X-goog-api-key': api_key
-    }
+    # Test prompt
+    test_prompt = "Hello! Can you tell me about Istanbul in 2 sentences?"
     
-    data = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": "Hello! You are a hotel concierge. How do you help guests? Give a short response."
-                    }
-                ]
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.7,
-            "maxOutputTokens": 200
-        }
-    }
+    print(f"📝 Test prompt: {test_prompt}")
     
     try:
-        print("📡 Sending API request...")
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
+        # Test async generation
+        response = await wrapper.generate_content(test_prompt)
+        print(f"🤖 Response: {response}")
         
-        result = response.json()
+        if "API error" in response:
+            print("❌ API error occurred")
+            return False
         
-        print("✅ API response received!")
-        print(f"📊 Status Code: {response.status_code}")
+        print("✅ OpenRouter Gemini API test successful!")
+        return True
         
-        # Extract response
-        if 'candidates' in result and len(result['candidates']) > 0:
-            content = result['candidates'][0]['content']
-            if 'parts' in content and len(content['parts']) > 0:
-                text = content['parts'][0]['text']
-                print(f"🤖 AI Response: {text}")
-                return True
-        
-        print("❌ Response format is different than expected")
-        print(f"📄 Full response: {json.dumps(result, indent=2)}")
-        return False
-        
-    except requests.exceptions.RequestException as e:
-        print(f"❌ API error: {e}")
-        return False
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f"❌ Error: {e}")
         return False
 
-def test_concierge_integration():
-    """Test concierge integration"""
-    
-    print("\n🏨 Concierge Integration Test")
-    print("=" * 40)
+async def test_concierge_integration():
+    """Test Concierge integration with Gemini"""
+    print("\n🏨 Testing Concierge Integration...")
     
     try:
         from app.core.concierge import AIConcierge
-        from app.config import settings
         
-        print("🔧 Starting Concierge...")
+        # Initialize concierge
         concierge = AIConcierge(settings)
         
-        print("💬 Sending test message...")
-        response = asyncio.run(concierge.process_guest_request(
-            guest_id="test_guest",
-            message="Hello, can I get information about the hotel?"
-        ))
+        # Test message
+        test_message = "Can you recommend a good restaurant in Istanbul?"
         
-        print(f"✅ Concierge response: {response[:100]}...")
+        print(f"💬 Test message: {test_message}")
+        
+        # Process request
+        response = await concierge.process_chat_request("test_guest", test_message)
+        
+        print(f"🎹 Concierge response: {response[:200]}...")
+        
+        if "API error" in response:
+            print("❌ Concierge API error")
+            return False
+        
+        print("✅ Concierge integration test successful!")
         return True
         
     except Exception as e:
         print(f"❌ Concierge error: {e}")
         return False
 
-if __name__ == "__main__":
-    import asyncio
+async def main():
+    """Main test function"""
+    print("🚀 Starting OpenRouter Gemini Integration Tests...\n")
     
-    # Gemini API test
-    gemini_success = test_gemini_api()
+    # Test 1: Direct API
+    api_success = await test_gemini_api()
     
-    # Concierge integration test
-    concierge_success = test_concierge_integration()
+    # Test 2: Concierge Integration
+    concierge_success = await test_concierge_integration()
     
-    print("\n" + "=" * 40)
-    print("📊 Test Results:")
-    print(f"   Gemini API: {'✅ Successful' if gemini_success else '❌ Failed'}")
-    print(f"   Concierge: {'✅ Successful' if concierge_success else '❌ Failed'}")
+    # Results
+    print("\n📊 Test Results:")
+    print(f"   API Test: {'✅ PASS' if api_success else '❌ FAIL'}")
+    print(f"   Concierge Test: {'✅ PASS' if concierge_success else '❌ FAIL'}")
     
-    if gemini_success and concierge_success:
-        print("\n🎉 All tests successful! System is ready.")
+    if api_success and concierge_success:
+        print("\n🎉 All tests passed!")
+        return True
     else:
-        print("\n⚠️  Some tests failed. Please check.") 
+        print("\n⚠️ Some tests failed!")
+        return False
+
+if __name__ == "__main__":
+    success = asyncio.run(main())
+    sys.exit(0 if success else 1) 
