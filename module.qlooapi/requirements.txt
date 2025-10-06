@@ -1,0 +1,27 @@
+# Qloo API Module - Core Dependencies
+# ====================================
+
+# HTTP Client
+requests>=2.31.0,<3.0.0
+
+# Data Validation (if needed)
+pydantic>=2.0.0,<3.0.0
+
+# Type Hints Support
+typing-extensions>=4.0.0; python_version < "3.8"
+
+# Optional: OpenAI Integration
+openai>=1.0.0,<2.0.0; extra == "openai"
+
+# Optional: Google Gemini Integration  
+google-generativeai>=0.3.0,<1.0.0; extra == "gemini"
+
+# Optional: Local LLM Integration
+transformers>=4.30.0,<5.0.0; extra == "local"
+torch>=2.0.0,<3.0.0; extra == "local"
+
+# Development Dependencies (install with: pip install -e ".[dev]")
+pytest>=7.0.0; extra == "dev"
+pytest-asyncio>=0.21.0; extra == "dev"
+black>=23.0.0; extra == "dev"
+isort>=5.0.0; extra == "dev"
